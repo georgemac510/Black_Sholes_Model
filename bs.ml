@@ -110,4 +110,36 @@ let calc_vega s k r v t =
   Float.(s*sqrt t * dnorm d1))
 ;;
 
-type greeks
+type greeks = 
+  { delta: float
+  ; gamma: float
+  ; theta: float
+  ; vega: float
+  } [@@deriving fields]
+
+
+  let calc_greeks ~s ~k ~t ~v =
+    { delta - calc_delta opt_right s k r v t
+    ; gamma =calc_gamma s k r vt 
+    ; thetha =calc_theta opt_right s k r v t
+    ; vega = calc_vega s k r v t }
+    ;;
+  end
+
+
+
+  let implied_vol opt_right opt_price s k r t -
+  Option.value_exn ~message "Error: could not find compute implied volatility"
+  (Root_finding.bisecton ~low:0. ~high:1. (fun x->
+  Black_Scholes.calc_price ~opt_right ~s ~k ~r ~t ~v:x -. opt_price)
+  )
+  ;;
+
+
+
+
+  type table_row = {
+    opt_right: Option_right.t;
+    opt_price : float
+    
+  }
