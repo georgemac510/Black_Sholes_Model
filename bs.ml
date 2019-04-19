@@ -140,6 +140,50 @@ type greeks =
 
   type table_row = {
     opt_right: Option_right.t;
-    opt_price : float
-    
+    opt_price : float ;
+    opt_greeks: Black_scholes.greeks;
+    opt_impvol: float;
+
   }
+
+
+  let print_table rows =
+    let open Textutils.Ascii_table in
+    let col = Column.create ~align:Align.Right in
+    output ~oc:stdout [
+      col "Right"  (fun x -> Option_right.to_string x.opt_right);
+      col "Price"  (fun x -> sprintf "%2.2f" x.opt_price);
+      col "Delta"  (fun x -> sprintf "%2.2f" (Black_scholes.delta x.opt_greeks));
+      col "Gamma"  (fun x -> sprintf "%2.2f" (Black_scholes.gamma x.opt_greeks));
+      col "Theta"  (fun x -> sprintf "%2.2f" (Black_scholes.theta x.opt_greeks));
+      col "Vega"   (fun x -> sprintf "%2.2f" (Black_scholes.vega  x.opt_greeks));
+      col "ImpVol" (fun x -> sprintf "%2.2f" x.opt_impvol);
+    ] rows
+  ;;
+
+  
+  let command =
+    Command.basic
+    ~summary:"Calculates the price and the greeks of a Europeancall and put option. "
+    (let open Command.Let_syntax in
+    let open Command.Param in
+    let%map
+    s =flag "-s" (optional_with_default 100. float) ~doc: "Price of Underlying"
+    and k=flag "-k"(optional_with_default 100. float) ~doc:"Strike Price"
+    and r= flag "-r"(optinaL-with_default 0.1 float)~doc: "Risk Free interest rate"
+    and v= flag "-v"(optional_with_default 0.25. float)~doc: "Volatility"
+    and t= flag "-t"(optional_with_default 1. float)~doc: "Time to maturity"
+    in
+    fun () ->
+    let create_row opt_right= 
+      let opt_price = Blakc_scholes.calc_price ~opt_right ~s ~k ~r ~v ~t in
+      { opt_right = opt_right
+      ;opt_right=opt_price
+      ;opt_greeks =Black_Sholes.calc_greeks ~opt_right ~s ~k ~r ~v ~t
+      ; opt_impol =implied_vol opt_right opt_price} s k r t }
+      in
+      print_table [create_row `Call; create_row `Put])
+      ;;
+
+
+      let ()=Commmand.run command
