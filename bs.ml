@@ -32,7 +32,7 @@
 
 
 
-    module Blach_Sholes : sig
+    module Black_Sholes : sig
 
 
 
@@ -176,7 +176,7 @@ type greeks =
     in
     fun () ->
     let create_row opt_right= 
-      let opt_price = Blakc_scholes.calc_price ~opt_right ~s ~k ~r ~v ~t in
+      let opt_price = Black_scholes.calc_price ~opt_right ~s ~k ~r ~v ~t in
       { opt_right = opt_right
       ;opt_right=opt_price
       ;opt_greeks =Black_Sholes.calc_greeks ~opt_right ~s ~k ~r ~v ~t
